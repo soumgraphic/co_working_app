@@ -1,49 +1,25 @@
-import 'package:co_working_app/models/category.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:co_working_app/data/data.dart';
 import 'package:co_working_app/models/coworking.dart';
 import 'package:co_working_app/screens/coworking_details/coworking_detail_screen.dart';
-import 'package:co_working_app/theme/icons.dart';
+import 'package:co_working_app/utils/assets_utils.dart';
+import 'package:co_working_app/widgets/icone_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
+
+  const HomeScreen({
+    Key key
+  }) : super(key: key);
 }
 
 class _HomeState extends State<HomeScreen> {
 
-  List<Coworking> coworkingsData = getCoworkings();
-  List<Category> categoriesData = getCategories();
-
-  Widget _buildCategory(BuildContext context, Category category) {
-    return Center(
-      child: Column(
-        children: <Widget>[
-          Container(
-              width: 65,
-              height: 65,
-              decoration: BoxDecoration(
-                color: Color(category.color),
-                borderRadius: BorderRadius.circular(20)
-              ),
-              child: IconButton(
-                icon: Icon(IconData(category.iconCode, fontFamily: 'MaterialIcons')),
-                color: Colors.white,
-                iconSize: 40,
-                onPressed: () {},
-              ),
-          ),
-          SizedBox(height: 10,),
-          Text(
-            category.name,
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400
-            ),
-          )
-        ],
-      ),
-    );
-  }
+  List<Coworking> coworkingsData = coworkings();
 
   Widget _buildSearchTextField() {
     return Row(
@@ -109,15 +85,15 @@ class _HomeState extends State<HomeScreen> {
 
   Widget _buildListRecommendation(BuildContext context, Coworking coworking) {
     return GestureDetector(
-      onTap: () => Navigator.push( /// Lors du clique sur un item pour voir les details du restaurant, on navigue vers une nouvelle page
-          context, /// Le contexte a passer au MaterialPageRoute
+      onTap: () => Navigator.push(
+          context,
           MaterialPageRoute(
-              builder: (context) => CoworkingDetailScreen(coworking) /// On passe lors de la navigation le restaurant concerner, ///  le builder: (_) underscore represente le contexte
+              builder: (context) => CoworkingDetailScreen(coworking: coworking)
           )
       ),
       child: Center(
         child: Stack(
-          alignment: Alignment.center, /// Pour aligner les sous composants sur le centre de la stack
+          alignment: Alignment.center,
           children: <Widget>[
             Hero(
               tag: coworking.coworkingId,
@@ -128,36 +104,36 @@ class _HomeState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
                     image: DecorationImage(
-                        image: AssetImage('assets/images/coworking.jpg'),
+                        image: CachedNetworkImageProvider(coworking.image),
                         fit: BoxFit.cover
                     )
                 ),
               ),
             ),
-            Container( /// Gradient level definition on container
+            Container(
               height: 310,
               width: 260,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30.0),
-                  gradient: LinearGradient( /// Linear gradient definition
+                  gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [ /// Les couleurs avec leur niveau d'opacite du degrade du debut jusqua la fin comme sur photoshop
-                        Colors.black.withOpacity(0.3),
-                        Colors.black87.withOpacity(0.3),
+                      colors: [
+                        Colors.black87.withOpacity(0.2),
                         Colors.black54.withOpacity(0.7),
-                        Colors.black38.withOpacity(0.7)
+                        Colors.black38.withOpacity(0.7),
+                        Colors.black38.withOpacity(0.3),
                       ],
-                      stops: [0.1, 0.7, 0.8, 0.9] /// L'emplacement des couleurs sur la ligne de degrade sur 100 par ex: Colors.black.withOpacity(0.3) => 0.1
+                      stops: [0.1, 0.7, 0.8, 0.9]
                   )
               ),
             ),
-            Positioned( /// Definition d'un nouveau widget pour positionner nos elements sur le widget stack, ce widget doit etre toujours sous le widget Stack
-              top: 165.0, /// pour placer les sous composants en fonction de la position en bas
+            Positioned(
+              top: 165.0,
               width: 210,
-              child: Column( /// Definition d'une colonne pour les textes nom du menu et le prix
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[ /// Definition des deux textes nom et prix du menu du restaurant
+                children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: Text(
@@ -176,7 +152,7 @@ class _HomeState extends State<HomeScreen> {
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w400,
                         letterSpacing: 1.2
                     ),
                   ),
@@ -220,7 +196,7 @@ class _HomeState extends State<HomeScreen> {
                                 border: Border.all(color: Colors.white, width: 2),
                                 borderRadius: BorderRadius.circular(50),
                                 image: DecorationImage(
-                                    image: AssetImage('assets/images/coworking.jpg'),
+                                    image:  CachedNetworkImageProvider(coworking.participants[0].avatarUrl),
                                     fit: BoxFit.cover
                                 )
                             ),
@@ -235,7 +211,7 @@ class _HomeState extends State<HomeScreen> {
                                 border: Border.all(color: Colors.white, width: 2),
                                 borderRadius: BorderRadius.circular(50),
                                 image: DecorationImage(
-                                    image: AssetImage('assets/images/coworking.jpg'),
+                                    image: CachedNetworkImageProvider(coworking.participants[1].avatarUrl),
                                     fit: BoxFit.cover
                                 )
                             ),
@@ -291,11 +267,11 @@ class _HomeState extends State<HomeScreen> {
               Navigator.pop(context);
             },
             child: Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Icon(
-                Icons.menu,
-                size: 30,
-                color: Colors.black,
+              padding: EdgeInsets.only(left: 10, top: 10),
+              child: SvgPicture.asset(
+                getIconMenuAlt05(),
+                placeholderBuilder: (context) => CircularProgressIndicator(),
+                color: Colors.black87,
               ),
             ),
           ),
@@ -305,14 +281,19 @@ class _HomeState extends State<HomeScreen> {
               child: Container(
                 height: 50,
                 width: 50,
-                child: CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: Text(
-                      'LM',
-                    style: TextStyle(
-                      color: Colors.white
+                child: CachedNetworkImage(
+                  imageUrl: currentUser().avatarUrl,
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(Theme.of(context).primaryColor.withOpacity(0.3), BlendMode.colorBurn)),
                     ),
                   ),
+                  placeholder: (context, url) => new CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => new Icon(Icons.error),
                 )
               )
             )
@@ -341,7 +322,7 @@ class _HomeState extends State<HomeScreen> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        'Hi Laura Menzel,',
+                        'Hi ' + currentUser().name + ',',
                         style: TextStyle(
                           color: Colors.black38,
                           fontSize: 18
@@ -381,10 +362,10 @@ class _HomeState extends State<HomeScreen> {
                           runSpacing: 6,
                           alignment: WrapAlignment.start,
                           children: [
-                            _buildCategory(context, getCategories()[0]),
-                            _buildCategory(context, getCategories()[1]),
-                            _buildCategory(context, getCategories()[2]),
-                            _buildCategory(context, getCategories()[3]),
+                            IconContainer(category: categories2()[0]),
+                            IconContainer(category: categories2()[1]),
+                            IconContainer(category: categories2()[2]),
+                            IconContainer(category: categories2()[3]),
                           ],
                         ),
                       ],
